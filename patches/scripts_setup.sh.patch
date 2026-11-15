@@ -1,0 +1,15 @@
+diff --git a/scripts/setup.sh b/scripts/setup.sh
+index 3368daf..010aa99 100755
+--- a/scripts/setup.sh
++++ b/scripts/setup.sh
+@@ -5,6 +5,10 @@ if [ -z "${BASH_VERSION:-}" ] || [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+ fi
+ set -euo pipefail
+ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
++# Windows: cmake, git e o compilador sao binarios NATIVOS e nao traduzem /c/...;
++# sem esta linha o cmake recebe um caminho que nao existe (foi o que aconteceu:
++# "The source directory /c/Fate/... does not exist").
++case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) ROOT="$(cygpath -m "$ROOT")" ;; esac
+ EMSDK="${EMSDK:-$ROOT/tools/emsdk}"
+ EMSDK_VERSION="6.0.11"
+ web=1

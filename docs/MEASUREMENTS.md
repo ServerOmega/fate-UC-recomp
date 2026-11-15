@@ -93,7 +93,7 @@ with a looser threshold it enters later and stays in longer. It was reverted.
 
 ```bash
 PS2_FRAME_LOG=C:/logs/frames.csv \
-  ./.local/build/ps2run.exe --disc .local/upstream/games/fate/disc.iso \
+  ./.local/upstream/build/native-fate/ps2run.exe --disc .local/upstream/games/fate/disc.iso \
   --memcard .local/upstream/games/fate/card.ps2 \
   --game-dir .local/upstream/games/fate --window
 

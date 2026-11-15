@@ -1,9 +1,24 @@
 diff --git a/scripts/cxx.sh b/scripts/cxx.sh
-index 7941649..73bf7ab 100644
+index 7941649..1626066 100644
 --- a/scripts/cxx.sh
 +++ b/scripts/cxx.sh
-@@ -40,6 +40,8 @@ PROBE
-       if "$cxx" -std=c++20 $stdlib "$cxx_probe/t.cpp" -o "$cxx_probe/t" 2> /dev/null; then
+@@ -20,6 +20,10 @@ if [ -n "$cached_cxx" ] && [ "$cached_probe" = clang-vector ] && [ "$cached_env"
+   cxx_stamp=$cached_stamp
+ else
+   cxx_probe=$(mktemp -d)
++  # O compilador do Windows e um programa nativo e nao le /tmp/... . O probe tem
++  # que ser apresentado com caminho C:/..., senao o teste falha e um clang bom e
++  # descartado (foi o que aconteceu: clang 23 com <format> era recusado).
++  case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) cxx_probe_win=$(cygpath -m "$cxx_probe") ;; *) cxx_probe_win="$cxx_probe" ;; esac
+   cat > "$cxx_probe/t.cpp" << 'PROBE'
+ #ifndef __clang__
+ #error not clang
+@@ -37,9 +41,11 @@ PROBE
+   for cxx in "${cxx_candidates[@]}"; do
+     command -v "$cxx" > /dev/null || continue
+     for stdlib in "" -stdlib=libc++; do
+-      if "$cxx" -std=c++20 $stdlib "$cxx_probe/t.cpp" -o "$cxx_probe/t" 2> /dev/null; then
++      if "$cxx" -std=c++20 $stdlib "$cxx_probe_win/t.cpp" -o "$cxx_probe_win/t" 2> /dev/null; then
          cxx=$(command -v "$cxx")
          [ -f "$cxx.exe" ] && cxx="$cxx.exe"
 +        # Windows: cmake/clang sao nativos e nao traduzem /c/... ; cygpath -m da C:/

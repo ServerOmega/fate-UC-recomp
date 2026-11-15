@@ -25,7 +25,7 @@ cd fate-UC-recomp
 Then double-click **`play-fate.bat`**, or:
 
 ```bash
-./.local/build/ps2run.exe --disc .local/upstream/games/fate/disc.iso \
+./.local/upstream/build/native-fate/ps2run.exe --disc .local/upstream/games/fate/disc.iso \
     --memcard .local/upstream/games/fate/card.ps2 \
     --game-dir .local/upstream/games/fate --window
 ```

@@ -23,7 +23,7 @@ set PS2_PRESENT_MODE=immediate
 set PS2_SHARP_2D=0
 
 set GAME_DIR=.local\upstream\games\fate
-set PS2RUN=.local\build\ps2run.exe
+set PS2RUN=.local\upstream\build\native-fate\ps2run.exe
 
 if not exist "%PS2RUN%" (
     echo The runner is not built yet.
