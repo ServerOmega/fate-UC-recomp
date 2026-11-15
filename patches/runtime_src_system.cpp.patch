@@ -1,0 +1,21 @@
+diff --git a/runtime/src/system.cpp b/runtime/src/system.cpp
+index 30b3a1a..df4f23b 100644
+--- a/runtime/src/system.cpp
++++ b/runtime/src/system.cpp
+@@ -20,6 +20,7 @@
+ #include "ps2/os.hpp"
+ #include "ps2/pace.hpp"
+ #include "ps2/state.hpp"
++#include "ps2/tuned_defaults.hpp"
+ #include "ps2/state_request.hpp"
+ #include "ps2/system.hpp"
+ #include "ps2/video.hpp"
+@@ -808,7 +809,7 @@ void thread_tune(Who who) {
+     struct Throttling {
+         unsigned long version, control, state;
+     };
+-    if (!os::env("PS2_QOS").empty()) {
++    if (ps2::tuned::qos()) {
+         Throttling t{1, 1, 0};  // control EXECUTION_SPEED, state 0: never throttle
+         static const bool process = SetProcessInformation(GetCurrentProcess(), 4, &t, sizeof t) != 0;  // ProcessPowerThrottling
+         (void)process;

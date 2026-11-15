@@ -1,0 +1,23 @@
+# Nada de dado de jogo entra neste repositorio: disco, modulos extraidos,
+# codigo gerado a partir do executavel do jogo, saves, capturas, binarios.
+*.iso
+*.bin
+*.ps2
+*.state
+*.inputs
+*.png
+*.jpg
+*.ppm
+*.wav
+*.ogg
+*.mp4
+
+# A arvore de trabalho do build (clone do upstream, gerado, binarios).
+.local/
+build/
+build-*/
+
+# Extraidos do disco pelo build.sh
+iop-modules/
+generated-iop/
+game-frames/

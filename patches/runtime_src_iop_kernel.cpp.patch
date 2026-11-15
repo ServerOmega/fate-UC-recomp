@@ -1,0 +1,51 @@
+diff --git a/runtime/src/iop/kernel.cpp b/runtime/src/iop/kernel.cpp
+index 7b6a581..54a1d7a 100644
+--- a/runtime/src/iop/kernel.cpp
++++ b/runtime/src/iop/kernel.cpp
+@@ -16,6 +16,7 @@
+ #include <queue>
+ #include <set>
+ #include <stdexcept>
++#include "ps2/iop/r3000_native.hpp"
+ 
+ namespace ps2::iop {
+ 
+@@ -419,7 +420,7 @@ std::uint32_t call_guest(std::uint32_t address, std::uint32_t a0, std::uint32_t
+     g_switch = false;
+     while (!g_nested_done && guard > 0) {
+         std::int64_t budget = kSlice;
+-        execute(g_cpu, budget);
++        rodar_nativo(g_cpu, budget, execute);
+         guard -= kSlice - budget;
+         switch_wanted |= g_switch;
+         g_switch = false;
+@@ -572,6 +573,10 @@ void trace_hle(const char *library, const char *function, const Cpu &c) {
+ }
+ 
+ void boot() {
++    // Modulos do IOP traduzidos para C++ (tradutor R3000). Precisa vir antes de
++    // qualquer execucao: rodar_nativo() consulta a tabela pelo PC.
++    // No build sem IOP traduzido, registrar_todos() e vazia (versao fraca).
++    registrar_todos();
+     g_hle.clear();
+     g_hle_ids.clear();
+     g_hle_stubs.clear();
+@@ -695,7 +700,7 @@ void run(std::uint64_t ee_cycles) {
+         const std::int64_t given = budget;
+         {
+             const cost::Timer exec_time(cost::kIopExec);
+-            execute(g_cpu, budget);
++            rodar_nativo(g_cpu, budget, execute);
+         }
+         if (cost::g_on) cost::g_exec_cycles += static_cast<std::uint64_t>(given - std::max<std::int64_t>(0, budget));
+         g_now += static_cast<std::uint64_t>(std::max<std::int64_t>(1, given - std::max<std::int64_t>(0, budget)));
+@@ -796,6 +801,9 @@ std::int32_t link_module(const std::vector<std::uint8_t> &data, const std::strin
+     const int id = g_next_module++;
+     g_modules[id] = Module{id, module_name, base, total, base + entry, base + gp};
+     g_module_paths[id] = path;
++    // Avisa a ponte do IOP nativo: a partir de agora, o codigo traduzido deste
++    // modulo responde nestes enderecos reais (o loader relocalizou os saltos).
++    ps2::iop::modulo_carregado(module_name, base);
+     if (g_trace_modules) std::fprintf(stderr, "[iop] module %d %s at 0x%08X size 0x%X entry 0x%08X\n", id, module_name.c_str(), base, total, base + entry);
+     return id;
+ }

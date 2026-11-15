@@ -1,0 +1,13 @@
+diff --git a/scripts/port.sh b/scripts/port.sh
+index 45ebc7d..51092e6 100755
+--- a/scripts/port.sh
++++ b/scripts/port.sh
+@@ -5,6 +5,8 @@ if [ -z "${BASH_VERSION:-}" ] || [ "${BASH_VERSINFO:-0}" -lt 4 ]; then
+ fi
+ set -euo pipefail
+ ROOT="$(cd "$(dirname "$0")/.." && pwd)"
++# Windows: binarios nativos nao traduzem /c/...; o bash do MSYS aceita C:/...
++case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) ROOT="$(cygpath -m "$ROOT")" ;; esac
+ here="$ROOT/scripts"
+ 
+ usage() {

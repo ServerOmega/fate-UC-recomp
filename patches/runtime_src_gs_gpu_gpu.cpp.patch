@@ -1,0 +1,68 @@
+diff --git a/runtime/src/gs/gpu/gpu.cpp b/runtime/src/gs/gpu/gpu.cpp
+index 5c4b1cc..0f3994e 100644
+--- a/runtime/src/gs/gpu/gpu.cpp
++++ b/runtime/src/gs/gpu/gpu.cpp
+@@ -6,6 +6,7 @@
+ #include "ps2/hitch.hpp"
+ #include "ps2/os.hpp"
+ #include "ps2/system.hpp"
++#include "ps2/tuned_defaults.hpp"
+ #include "ps2/video.hpp"
+ 
+ #include <webgpu/webgpu.h>
+@@ -3189,7 +3190,7 @@ static bool open_backend([[maybe_unused]] std::uint32_t backends, const char *na
+     };
+     bool adapter_done = false;
+     WGPURequestAdapterOptions options = WGPU_REQUEST_ADAPTER_OPTIONS_INIT;
+-    options.powerPreference = std::getenv("PS2_GPU_LOW_POWER") ? WGPUPowerPreference_LowPower : WGPUPowerPreference_HighPerformance;
++    options.powerPreference = ps2::tuned::low_power() ? WGPUPowerPreference_LowPower : WGPUPowerPreference_HighPerformance;
+     options.forceFallbackAdapter = std::getenv("PS2_GPU_FALLBACK") != nullptr;
+     WGPURequestAdapterCallbackInfo acb = WGPU_REQUEST_ADAPTER_CALLBACK_INFO_INIT;
+     acb.mode = WGPUCallbackMode_AllowSpontaneous;
+@@ -3268,14 +3269,21 @@ bool init(Mode m) {
+ #ifdef __EMSCRIPTEN__
+     order.push_back({0, "WebGPU"});
+ #else
+-    // PS2_GPU_BACKEND=vulkan, dx12 or d3d12 (any letter case) picks the graphics API and nothing else is tried. Another value is said so
+-    // and ignored. Unset: Windows tries Direct3D 12 first and Vulkan if that cannot start (docs/speed.md: on the Intel laptop Direct3D 12
+-    // draws the same pictures 18 to 52 % faster than Vulkan); elsewhere wgpu picks. The log line "[gpu] ... on <API>" names the API used.
++    // PS2_GPU_BACKEND=vulkan, dx12, d3d12 or gl (any letter case) picks the graphics API and nothing else is tried. Another
++    // value is said so and ignored. Unset: Windows tries Direct3D 12 first and Vulkan if that cannot start (docs/speed.md: on the
++    // Intel laptop Direct3D 12 draws the same pictures 18 to 52 % faster than Vulkan); elsewhere wgpu picks. The log line
++    // "[gpu] ... on <API>" names the API used.
++    //
++    // "gl" is here because of the many small draws of a busy scene: wgpu reaches OpenGL through ANGLE on Windows, and a driver
++    // that takes small batches cheaply can beat Direct3D 12 at that, even though Direct3D 12 usually wins on plain fill. It is the
++    // least tested of the three (wgpu's own notes call its Windows path young), so it is only ever chosen when asked for by name,
++    // never as a fallback.
+     if (std::string backend = os::env("PS2_GPU_BACKEND"); !backend.empty()) {
+         for (char &c : backend) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+         if (backend == "vulkan") order.push_back({WGPUInstanceBackend_Vulkan, "Vulkan"}), forced = true;
+         else if (backend == "dx12" || backend == "d3d12") order.push_back({WGPUInstanceBackend_DX12, "Direct3D 12"}), forced = true;
+-        else std::fprintf(stderr, "[gpu] PS2_GPU_BACKEND=%s is not vulkan, dx12 or d3d12: ignored\n", os::env("PS2_GPU_BACKEND").c_str());
++        else if (backend == "gl" || backend == "opengl" || backend == "gles") order.push_back({WGPUInstanceBackend_GL, "OpenGL"}), forced = true;
++        else std::fprintf(stderr, "[gpu] PS2_GPU_BACKEND=%s is not vulkan, dx12, d3d12 or gl: ignored\n", os::env("PS2_GPU_BACKEND").c_str());
+     }
+     if (order.empty()) {
+ #ifdef _WIN32
+@@ -3345,6 +3353,7 @@ bool init(Mode m) {
+     // PS2_SHARP_2D: how upscaled 2D art (text, icons, menus) is filtered, see SHARP in gs.wgsl: 0 plain bilinear, 1 sharp (the
+     // default), 2 sharpest
+     if (const char *sharp = std::getenv("PS2_SHARP_2D")) g_sharp_2d = std::clamp<std::uint32_t>(static_cast<std::uint32_t>(std::atoi(sharp)), 0u, 2u);
++    else if (ps2::tuned::sharp_2d() >= 0) g_sharp_2d = std::clamp<std::uint32_t>(static_cast<std::uint32_t>(ps2::tuned::sharp_2d()), 0u, 2u);
+     g_copy_words = (1u << 20) * g_scale * g_scale;
+     if (const int tile = std::atoi(os::env("PS2_TILE").c_str()); tile == 4 || tile == 8 || tile == 16) g_tile = tile;
+     tiles::configure(static_cast<int>(g_scale), g_tile);
+@@ -4164,8 +4173,10 @@ bool attach_surface(const SurfaceTarget &target) {
+         for (std::size_t i = 0; i < caps.presentModeCount; ++i)
+             if (caps.presentModes[i] == wanted) g_present_mode = wanted;
+     // PS2_PRESENT_MODE=fifo, relaxed, mailbox or immediate asks for one mode (when the surface offers it); PS2_FRAME_LATENCY=1..8 sets how many
+-    // pictures the swap chain keeps in flight. Both are for experiments (docs/speed.md); the log line below says what is used.
+-    if (std::string want = os::env("PS2_PRESENT_MODE"); !want.empty()) {
++    // pictures the swap chain keeps in flight. Both are for experiments (docs/speed.md); the log line below says what is used. When the variable
++    // is not set, tuned_defaults.hpp supplies "immediate" (see its comment: 46.4 -> 57.7 pictures a second on the machine it was measured on).
++    const std::string tuned_mode = ps2::tuned::present_mode() ? ps2::tuned::present_mode() : "";
++    if (std::string want = os::env("PS2_PRESENT_MODE").empty() ? tuned_mode : os::env("PS2_PRESENT_MODE"); !want.empty()) {
+         for (char &c : want) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+         const WGPUPresentMode asked = want == "fifo" ? WGPUPresentMode_Fifo : want == "relaxed" ? WGPUPresentMode_FifoRelaxed : want == "mailbox" ? WGPUPresentMode_Mailbox : want == "immediate" ? WGPUPresentMode_Immediate : WGPUPresentMode_Undefined;
+         bool offered = false;

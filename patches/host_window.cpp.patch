@@ -1,0 +1,30 @@
+diff --git a/host/window.cpp b/host/window.cpp
+index 430d27b..802fbc8 100644
+--- a/host/window.cpp
++++ b/host/window.cpp
+@@ -1196,9 +1196,9 @@ bool menu_event(const SDL_Event &e) {
+             if (!e.key.repeat) back(k == SDL_SCANCODE_ESCAPE ? "Esc" : "Backspace");
+             break;
+         // the program's keys keep working; those that need the game running close the menu first
+-        case SDL_SCANCODE_F2: if (!e.key.repeat) menu_command(Command::look, 1); break;
+-        case SDL_SCANCODE_F5: if (!e.key.repeat) menu_command(Command::save, 1); break;
+-        case SDL_SCANCODE_F8: if (!e.key.repeat) menu_command(Command::load, 1); break;
++        case SDL_SCANCODE_F3: if (!e.key.repeat) menu_command(Command::look, 1); break;
++        case SDL_SCANCODE_F2: case SDL_SCANCODE_F5: if (!e.key.repeat) menu_command(Command::save, 1); break;
++        case SDL_SCANCODE_F4: case SDL_SCANCODE_F8: if (!e.key.repeat) menu_command(Command::load, 1); break;
+         case SDL_SCANCODE_F9:
+             if (!e.key.repeat) {
+                 close_menu("F9");
+@@ -1321,9 +1321,9 @@ void poll() {
+         if (e.type == SDL_KEYDOWN && !e.key.repeat) {
+             if (is_help_key(e.key.keysym.scancode))
+                 show_key_card((std::string("key ") + SDL_GetScancodeName(e.key.keysym.scancode) + " went down").c_str());
+-            if (e.key.keysym.scancode == SDL_SCANCODE_F2) cycle_look();
+-            if (e.key.keysym.scancode == SDL_SCANCODE_F5) ps2::quick_request(ps2::QuickKey::save);
+-            else if (e.key.keysym.scancode == SDL_SCANCODE_F8) ps2::quick_request(ps2::QuickKey::load);
++            if (e.key.keysym.scancode == SDL_SCANCODE_F3) cycle_look();
++            if (e.key.keysym.scancode == SDL_SCANCODE_F2 || e.key.keysym.scancode == SDL_SCANCODE_F5) ps2::quick_request(ps2::QuickKey::save);
++            else if (e.key.keysym.scancode == SDL_SCANCODE_F4 || e.key.keysym.scancode == SDL_SCANCODE_F8) ps2::quick_request(ps2::QuickKey::load);
+             else if (e.key.keysym.scancode == SDL_SCANCODE_F9) ps2::quick_request(ps2::QuickKey::report);
+         }
+         if (e.type == SDL_WINDOWEVENT && e.window.event == SDL_WINDOWEVENT_SIZE_CHANGED && g_gpu_present) {

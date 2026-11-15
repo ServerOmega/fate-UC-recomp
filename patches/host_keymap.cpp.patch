@@ -1,0 +1,70 @@
+diff --git a/host/keymap.cpp b/host/keymap.cpp
+index 2241140..dfa2934 100644
+--- a/host/keymap.cpp
++++ b/host/keymap.cpp
+@@ -169,29 +169,48 @@ const char *sharp_2d_word(int sharp) {
+ std::string with_sharp_2d(const std::string &file_text, int sharp) { return with_line(file_text, "sharp2d", std::string("sharp_2d = ") + sharp_2d_word(sharp)); }
+ 
+ bool is_reserved(int input) {
+-    return input == SDL_SCANCODE_F1 || input == SDL_SCANCODE_F2 || input == SDL_SCANCODE_F5 || input == SDL_SCANCODE_F8 || input == SDL_SCANCODE_F9 || input == SDL_SCANCODE_F11;
++    // F2 save, F3 look, F4 load, F1 menu, F9 report, F11 fullscreen: the program's own.
++    // F5 and F8 stay reserved because they still work as save and load.
++    return input == SDL_SCANCODE_F1 || input == SDL_SCANCODE_F2 || input == SDL_SCANCODE_F3 ||
++           input == SDL_SCANCODE_F4 || input == SDL_SCANCODE_F5 || input == SDL_SCANCODE_F8 ||
++           input == SDL_SCANCODE_F9 || input == SDL_SCANCODE_F11;
+ }
+ 
+ Config defaults() {
+     Config c;
+     const auto set = [&](Action a, std::vector<int> inputs) { c.inputs[a] = std::move(inputs); };
+-    set(DpadUp, {SDL_SCANCODE_UP}), set(DpadDown, {SDL_SCANCODE_DOWN}), set(DpadLeft, {SDL_SCANCODE_LEFT}), set(DpadRight, {SDL_SCANCODE_RIGHT});
+-    set(LeftUp, {SDL_SCANCODE_W}), set(LeftDown, {SDL_SCANCODE_S}), set(LeftLeft, {SDL_SCANCODE_A}), set(LeftRight, {SDL_SCANCODE_D});
+-    set(RightUp, {SDL_SCANCODE_I}), set(RightDown, {SDL_SCANCODE_K}), set(RightLeft, {SDL_SCANCODE_J}), set(RightRight, {SDL_SCANCODE_L});
+-    set(Cross, {SDL_SCANCODE_SPACE, SDL_SCANCODE_RETURN, SDL_SCANCODE_KP_ENTER});
+-    set(Circle, {SDL_SCANCODE_E, kMouseMiddle});
+-    set(Square, {kMouseLeft});
+-    set(Triangle, {kMouseRight});
+-    set(L1, {SDL_SCANCODE_LSHIFT, kMouseX2});
+-    set(R1, {SDL_SCANCODE_F});
+-    set(L2, {SDL_SCANCODE_Q});
+-    set(R2, {SDL_SCANCODE_R});
+-    set(L3, {SDL_SCANCODE_X});
+-    set(R3, {SDL_SCANCODE_C});
+-    set(Start, {SDL_SCANCODE_ESCAPE});
++    // The arrow keys drive BOTH the D-pad (precise movement in a fighting game,
++    // the base for down-forward) and the left stick (measured: the menus read the
++    // stick, not the D-pad).
++    set(DpadUp, {SDL_SCANCODE_UP}), set(DpadDown, {SDL_SCANCODE_DOWN});
++    set(DpadLeft, {SDL_SCANCODE_LEFT}), set(DpadRight, {SDL_SCANCODE_RIGHT});
++    // Sticks: WASD moves, ZXCV is the right stick (camera). The arrow keys keep
++    // working as the D-pad, which is what the menus of this game read.
++    set(LeftUp, {SDL_SCANCODE_UP}), set(LeftDown, {SDL_SCANCODE_DOWN});
++    set(LeftLeft, {SDL_SCANCODE_LEFT}), set(LeftRight, {SDL_SCANCODE_RIGHT});
++    set(RightUp, {}), set(RightDown, {}), set(RightLeft, {}), set(RightRight, {});
++    // The four buttons. This is a Japanese disc: circle confirms, cross goes back.
++    // Cross is Space ALONE: Enter belongs to Start now, and a key in two buttons
++    // makes the game see both at once (that is why the old layout felt dead).
++    // Attack row: A S D F are the four face buttons, Z X C V the four shoulders.
++    // Left hand on the arrows, right hand on the attacks: arcade layout.
++    set(Square, {SDL_SCANCODE_A});
++    set(Triangle, {SDL_SCANCODE_S});
++    set(Circle, {SDL_SCANCODE_D});
++    set(Cross, {SDL_SCANCODE_F, SDL_SCANCODE_SPACE});
++    set(L1, {SDL_SCANCODE_Z});
++    set(L2, {SDL_SCANCODE_X});
++    set(R1, {SDL_SCANCODE_C});
++    set(R2, {SDL_SCANCODE_V});
++    set(L3, {});
++    set(R3, {});
++    // Start on Enter (the old Esc keeps working); Select on Tab.
++    set(Start, {SDL_SCANCODE_RETURN, SDL_SCANCODE_KP_ENTER, SDL_SCANCODE_ESCAPE});
+     set(Select, {SDL_SCANCODE_TAB, SDL_SCANCODE_BACKSPACE});
+-    set(Roll, {SDL_SCANCODE_LCTRL, kMouseX1});
+-    set(Rage, {SDL_SCANCODE_V});
++    // roll and rage belong to God of War; this game has neither, and a bound key
++    // here would steal a key the player needs.
++    set(Roll, {});
++    set(Rage, {});
+     set(Help, {});  // H used to be the key card; it was easy to hit by mistake, F1 opens the quick menu now
+     set(Menu, {});
+     return c;

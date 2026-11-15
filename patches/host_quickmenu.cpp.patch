@@ -1,0 +1,22 @@
+diff --git a/host/quickmenu.cpp b/host/quickmenu.cpp
+index 2857114..3f1a49e 100644
+--- a/host/quickmenu.cpp
++++ b/host/quickmenu.cpp
+@@ -111,7 +111,7 @@ constexpr int kEntries = 10;
+ constexpr Command kCommands[kEntries] = {Command::resume,   Command::save,       Command::load, Command::look,        Command::scale,
+                                          Command::sharp_2d, Command::fullscreen, Command::keys, Command::change_keys, Command::quit};
+ // the program's key for the same thing, shown dim at the right end of the entry
+-constexpr const char *kKeys[kEntries] = {"F1", "F5", "F8", "F2", "", "", "F11", "", "", ""};
++constexpr const char *kKeys[kEntries] = {"F1", "F2", "F4", "F3", "", "", "F11", "", "", ""};
+ constexpr int kVisibleRows = 11;  // lines of the keys page shown at once; the page scrolls
+ constexpr int kKeysPageChars = 58;
+ 
+@@ -264,7 +264,7 @@ bool Menu::select_at(int x, int y) {
+ 
+ void Menu::draw_keys(int window_width, int window_height, const Values &values, Picture &out) {
+     static const std::string kTitleText = "Change keys - the game waits", kHint = "Enter / click: change a key     Esc / Circle: back",
+-                             kFixed = "Not usable: F1 F2 F5 F8 F9 F11 (the program's)", kCapture = "Press a key or mouse button... (Esc: cancel)";
++                             kFixed = "Not usable: F1 F2 F3 F4 F5 F8 F9 F11 (the program's)", kCapture = "Press a key or mouse button... (Esc: cancel)";
+     key_rows_ = static_cast<int>(values.key_rows.size());
+     fit();
+     const int n = key_rows_, shown = std::min(n, kVisibleRows);

@@ -1,0 +1,24 @@
+diff --git a/runtime/src/iop/iop.hpp b/runtime/src/iop/iop.hpp
+index 5356ffd..87d6ed0 100644
+--- a/runtime/src/iop/iop.hpp
++++ b/runtime/src/iop/iop.hpp
+@@ -10,6 +10,8 @@ namespace ps2::state {
+ class Stream;
+ }
+ 
++#define PS2_IOP_TIPOS_DECLARADOS 1
++
+ namespace ps2::iop {
+ 
+ void state(ps2::state::Stream &s);
+@@ -82,6 +84,10 @@ std::int32_t load_module_buffer(const std::vector<std::uint8_t> &data, const std
+                                 std::function<void(int, int)> done = {});
+ // modload's LoadModuleBuffer and StartModule: link a module without running it, then run its start routine later
+ std::int32_t link_module(const std::vector<std::uint8_t> &data, const std::string &path);
++
++// Um passo do interpretador: roda ate o budget acabar. Fica na interface publica
++// porque o teste diferencial precisa rodar os dois caminhos sobre o mesmo estado.
++void execute(Cpu &c, std::int64_t &budget);
+ bool start_module(int id, const std::string &args, std::function<void(int, int)> done);
+ void set_trace(bool modules, bool hle);
+ 

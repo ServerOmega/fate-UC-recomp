@@ -1,0 +1,13 @@
+diff --git a/scripts/cxx.sh b/scripts/cxx.sh
+index 7941649..73bf7ab 100644
+--- a/scripts/cxx.sh
++++ b/scripts/cxx.sh
+@@ -40,6 +40,8 @@ PROBE
+       if "$cxx" -std=c++20 $stdlib "$cxx_probe/t.cpp" -o "$cxx_probe/t" 2> /dev/null; then
+         cxx=$(command -v "$cxx")
+         [ -f "$cxx.exe" ] && cxx="$cxx.exe"
++        # Windows: cmake/clang sao nativos e nao traduzem /c/... ; cygpath -m da C:/
++        case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) cxx=$(cygpath -m "$cxx") ;; esac
+         cxx_flags=(-DCMAKE_CXX_COMPILER="$cxx")
+         cxx_bin=$cxx
+         cxx_stdlib=$stdlib
