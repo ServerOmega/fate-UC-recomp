@@ -30,8 +30,20 @@ Then double-click **`play-fate.bat`**, or:
     --game-dir .local/upstream/games/fate --window
 ```
 
-**Controls:** `W A S D` move · `E` confirm · `Enter` start · `F5`/`F8` quick save/load ·
-`F11` full screen. This is a Japanese game: **circle confirms, cross goes back.**
+**Controls:**
+
+- **Arrows** — move. They drive both the d-pad and the left stick, because the menus
+  read the stick and the fighting game reads the d-pad.
+- **A S D F** — square, triangle, circle, cross
+- **Z X C V** — L1, L2, R1, R2
+- **Enter** — start · **Tab** — select
+- **Space** — cross (cancel)
+- **F2** — quick save · **F4** — quick load
+- **F1** — quick menu · **F11** — full screen
+
+This is a Japanese game: **circle (D) confirms, cross (F or Space) goes back.**
+
+The keys are in `games/fate/keys.ini` and can be changed there or from the F1 menu.
 
 ---
 

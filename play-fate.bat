@@ -38,11 +38,15 @@ if not exist "%PS2RUN%" (
 echo Starting Fate/unlimited codes...
 echo.
 echo   Controls:
-echo     W A S D   move
-echo     E         confirm (Japanese game: circle confirms, cross goes back)
-echo     Enter     start
-echo     F5 / F8   quick save / quick load
-echo     F11       full screen
+echo     Arrows    move (d-pad and left stick: menus read the stick)
+echo     A S D F   square / triangle / circle / cross
+echo     Z X C V   L1 / L2 / R1 / R2
+echo     Enter     start        Tab   select
+echo     Shift     (free)       Space cross (cancel)
+echo     F2        quick save   F4    quick load
+echo     F1        quick menu   F11   full screen
+echo.
+echo   Japanese game: circle (D) confirms, cross (F or Space) goes back.
 echo.
 
 "%PS2RUN%" --disc "%GAME_DIR%\disc.iso" --memcard "%GAME_DIR%\card.ps2" --game-dir "%GAME_DIR%" --window
