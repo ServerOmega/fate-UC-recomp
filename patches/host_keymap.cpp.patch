@@ -36,8 +36,8 @@ index 2241140..dfa2934 100644
 +    // stick, not the D-pad).
 +    set(DpadUp, {SDL_SCANCODE_UP}), set(DpadDown, {SDL_SCANCODE_DOWN});
 +    set(DpadLeft, {SDL_SCANCODE_LEFT}), set(DpadRight, {SDL_SCANCODE_RIGHT});
-+    // Sticks: WASD moves, ZXCV is the right stick (camera). The arrow keys keep
-+    // working as the D-pad, which is what the menus of this game read.
++    // Left stick: the same arrow keys, because the menus read the stick.
++    // Right stick: this fighting game does not use it, so nothing is bound.
 +    set(LeftUp, {SDL_SCANCODE_UP}), set(LeftDown, {SDL_SCANCODE_DOWN});
 +    set(LeftLeft, {SDL_SCANCODE_LEFT}), set(LeftRight, {SDL_SCANCODE_RIGHT});
 +    set(RightUp, {}), set(RightDown, {}), set(RightLeft, {}), set(RightRight, {});
