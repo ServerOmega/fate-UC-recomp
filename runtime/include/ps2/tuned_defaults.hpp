@@ -1,6 +1,6 @@
 // Defaults for the run that were tuned on one machine and measured, so that the
-// plain ps2run.exe (and a double-click on play-fate.bat) comes up with them instead
-// of the upstream defaults. Every one can still be overridden by the environment
+// plain ps2run (ps2run.exe on Windows) comes up with them. play.bat and play.sh
+// set the same variables, so a launch shows them. Every one can still be overridden by the environment
 // variable named beside it: PS2_TUNED=0 turns all of them off and gives back the
 // upstream behaviour exactly.
 //

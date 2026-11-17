@@ -43,16 +43,24 @@ case "$(uname -s)" in MINGW*|MSYS*|CYGWIN*) SOMETHING="$(cygpath -m "$SOMETHING"
 
 Two separate causes, and both were hit.
 
-**a. The compiler is not on the PATH.** The clang that works here is LLVM-MinGW installed by
-WinGet, which does not put itself on the PATH. `build.sh` searches for it explicitly:
+**a. The compiler is not on the PATH.** `CXX`, when it is set, is the compiler, and a failed
+probe stops there instead of quietly picking another one. Otherwise `build.sh` tries, in
+order: `clang++` / `clang` on `PATH` (newest `clang++-N` first), then LLVM-MinGW from WinGet
+for the current user, then `C:\Program Files\LLVM\bin`:
 
 ```
-C:/Users/<you>/AppData/Local/Microsoft/WinGet/Packages/
-    MartinStorsjo.LLVM-MinGW.UCRT_*/llvm-mingw-*/bin/clang.exe
+%LOCALAPPDATA%\Microsoft\WinGet\Packages\
+    MartinStorsjo.LLVM-MinGW*\llvm-mingw-*\bin\clang++.exe
 ```
 
-Install it with `winget install MartinStorsjo.LLVM-MinGW.UCRT`, or set `CXX` yourself to a
-clang 17 or newer.
+There is no user name in that path. Install it with
+`winget install MartinStorsjo.LLVM-MinGW.UCRT`, or set `CXX` to a clang 17 or newer.
+
+On Linux the same probe uses the system clang. A message that `<format>` cannot be found,
+while `clang++` itself is on the PATH, means the libstdc++ headers clang selected are from a
+GCC whose development package is not installed (Ubuntu: clang can prefer GCC 14 when only
+the GCC 13 headers are present). Install `libstdc++-N-dev` for that GCC, or libc++
+(`libc++-dev` on Debian, `libc++` on Arch, `libcxx-devel` on Fedora).
 
 **b. The probe runs in a POSIX directory.** `scripts/cxx.sh` builds its test in `mktemp -d`,
 which on this shell returns `/tmp/tmp.XXXX`. A native clang cannot read that, so the test
@@ -107,6 +115,26 @@ The earlier run that stopped here had **already produced a working native `ps2ru
 web build runs after it. So if you ever see this, check `build/native-fate/ps2run.exe` before
 assuming the build failed.
 
+## 7. Linux: a missing library, or the window never draws
+
+`build.sh` exits before the clone when a compile dependency is missing, and names the
+package on Arch, Debian/Ubuntu and Fedora. The ones that matter for the pinned runtime:
+
+| What fails | Why it is on the list |
+|---|---|
+| `SDL2 (headers)` | `find_package(SDL2)` builds the window. Without it the runner still links, with no window, so the script treats it as missing. |
+| `libX11` | `SDL_syswm.h` includes `X11/Xlib.h`. wgpu also `dlopen`s libX11 for an X11 surface. |
+| `libwayland-egl.so.1` | the same wgpu build `dlopen`s it for Wayland. KDE Plasma uses that path when SDL picks Wayland. |
+| `libvulkan.so.1` | wgpu `dlopen`s the loader. It is not a link-time library. |
+| no ICD under `/usr/share/vulkan/icd.d` | a warning, not a failed compile. Arch: `vulkan-radeon` / `vulkan-intel` / `nvidia-utils` / `vulkan-swrast`. Debian and Fedora: `mesa-vulkan-drivers`. |
+
+`dxcompiler.dll` is not part of a Linux build. Direct3D 12 is the Windows default; on Linux
+the log line is Vulkan.
+
+The POSIX-path failures in sections 1, 3 and 6 are Windows (MSYS) failures. On Linux the
+paths the shell uses are the paths cmake and clang use, and `build.sh` does not call
+`cygpath`.
+
 ## Verifying it worked
 
 ```bash
@@ -123,5 +151,11 @@ A healthy run ends with:
 [ee] stopped after 120 frames, ... cycles: frame limit reached
 ```
 
+On Linux the program is `ps2run` in that same folder, and the graphics line names Vulkan.
 `35 files, 675392 sectors` is Fate/unlimited codes (`SLPM-55108`). A different count means a
 different disc.
+
+`./build.sh --runtime-only` is the check that does not need a disc: the clone, the patches
+and a `ps2run` that links the runtime and the SDL window, with no translated game in it. It
+is written to `build/host-only/` so it does not occupy `build/native-fate/`, which `port.sh`
+reuses for the real game.

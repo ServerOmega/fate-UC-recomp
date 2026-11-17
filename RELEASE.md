@@ -3,6 +3,8 @@
 A ready-to-run build. **No disc image is included**: you bring your own copy of the game, and
 any filename works.
 
+Windows:
+
 ```
 play.bat          the launcher - double-click it
 ps2run.exe        the game, translated from the PS2 executable
@@ -12,21 +14,31 @@ dxil.dll          shader compiler support
 keys.ini          the controls, in plain text
 ```
 
+Linux (the picture is Vulkan; SDL2 and the Vulkan loader are the system's, and there is no
+DXC shader compiler — that is Direct3D 12):
+
+```
+play.sh           the launcher - ./play.sh
+ps2run            the game, translated from the PS2 executable
+keys.ini          the controls, in plain text
+```
+
 ---
 
 ## Run it
 
-1. Put your Fate/unlimited codes disc image in this folder. **Any name, any case** — `.iso` or
-   `.bin`, spaces and parentheses are fine.
-2. Double-click **`play.bat`**.
+1. Put your Fate/unlimited codes disc image in this folder. **Any name, any case** — `.iso`,
+   `.bin` or `.img`, spaces and parentheses are fine.
+2. Windows: double-click **`play.bat`**. Linux: `./play.sh`.
 
 It finds the image by itself. If there is more than one, pass the one you want:
 
 ```
 play.bat "D:\games\my other copy.iso"
+play.sh "/home/you/games/my other copy.iso"
 ```
 
-You can also **drag the image onto `play.bat`**.
+On Windows you can also **drag the image onto `play.bat`**.
 
 A memory card (`card.ps2`) is created on the first run. Saving from the game writes to it.
 
@@ -65,7 +77,7 @@ The 405 here cover the game as it has been played so far.
 
 ### Settings, already applied
 
-These are compiled into `ps2run.exe`; `play.bat` also sets them so you can see them:
+These are compiled into the runner; `play.bat` and `play.sh` also set them so you can see them:
 
 | Setting | Effect |
 |---|---|
@@ -87,23 +99,26 @@ back the upstream defaults exactly.
 ## If something is wrong
 
 **The picture tears in fast movement.** That is `PS2_PRESENT_MODE=immediate`. Edit `play.bat`
-and change it to `mailbox`: smoother, but it measured 46.4 Hz instead of 57.7.
+or `play.sh` and change it to `mailbox`: smoother, but it measured 46.4 Hz instead of 57.7.
 
-**Text and icons look soft.** Also the sharpening setting. Set `PS2_SHARP_2D=1` in `play.bat`
+**Text and icons look soft.** Also the sharpening setting. Set `PS2_SHARP_2D=1` in the launcher
 and accept half the CPU back.
 
 **It stutters when a new effect appears.** The vector program for that effect was not in the
 build and is being compiled while the game runs (a message says so in the log). It settles after
 the first time.
 
-**"no disc image found".** The image is not in this folder, or its extension is not `.iso` or
-`.bin`. Drag it onto `play.bat` instead.
+**"no disc image found".** The image is not in this folder, or its extension is not `.iso`,
+`.bin` or `.img`. On Windows, drag it onto `play.bat`. On Linux, pass the path to `play.sh`.
 
-**"ps2run.exe is not next to this file".** The four program files were separated. Keep them in
-one folder.
+**"ps2run.exe is not next to this file"** (Linux: **"ps2run is not next to this file"**). The
+program and the launcher were separated. On Windows keep `ps2run.exe`, `SDL2.dll`,
+`dxcompiler.dll` and `dxil.dll` in one folder. On Linux keep `ps2run` and `play.sh` together;
+SDL2 and `libvulkan.so.1` stay installed on the system.
 
-**It does not open at all.** Run `play.bat` from a command prompt to see the log. The last lines
-usually name the cause.
+**It does not open at all.** Run `play.bat` or `./play.sh` from a terminal to see the log. The
+last lines usually name the cause. On Linux a missing Vulkan driver is the usual one: the
+loader is installed, and no ICD json is present under `/usr/share/vulkan/icd.d`.
 
 ---
 

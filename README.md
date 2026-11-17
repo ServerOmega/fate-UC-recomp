@@ -16,19 +16,35 @@ save, no screenshot. You bring your own disc; `build.sh` turns it into a program
 
 ## Quick start
 
+Windows (Git Bash) or Linux. What to install is in [BUILD.md](docs/BUILD.md): clang 17+,
+CMake, Ninja, Git, Python 3. On Linux also SDL2, libX11, Wayland and a Vulkan loader plus a
+driver. `build.sh` names the missing packages for Arch, Debian/Ubuntu and Fedora.
+
 ```bash
 git clone https://github.com/ohackercego/fate-UC-recomp.git
 cd fate-UC-recomp
 ./build.sh "/path/to/Fate unlimited codes.iso"
 ```
 
-Then double-click **`play-fate.bat`**, or:
+The build fills `.local/upstream/build/native-fate/` with the runner, a launcher and
+`keys.ini`. Put the disc image next to the launcher (the build links the one you passed) and
+start it:
+
+- **Windows:** double-click `.local/upstream/build/native-fate/play.bat`
+- **Linux:** `./.local/upstream/build/native-fate/play.sh`
+
+`play.bat` and `play.sh` take the same argument if the image is somewhere else:
+`play.sh "/path/to/another copy.iso"`.
+
+Or run the binary yourself. On Windows:
 
 ```bash
 ./.local/upstream/build/native-fate/ps2run.exe --disc .local/upstream/games/fate/disc.iso \
     --memcard .local/upstream/games/fate/card.ps2 \
     --game-dir .local/upstream/games/fate --window
 ```
+
+On Linux the program in that folder is `ps2run`, and the same arguments apply.
 
 **Controls:**
 
@@ -43,7 +59,11 @@ Then double-click **`play-fate.bat`**, or:
 
 This is a Japanese game: **circle (D) confirms, cross (F or Space) goes back.**
 
-The keys are in `games/fate/keys.ini` and can be changed there or from the F1 menu.
+The keys ship in `config/keys.ini`. `build.sh` copies that file next to the runner, and into
+`games/fate/`, when it is not already there. Change it in the copy, or from the F1 menu.
+
+On Linux the picture is Vulkan. Direct3D 12 and `dxcompiler` are Windows-only, and `PS2_QOS`
+is applied only on Windows. The other settings below are read on both.
 
 ---
 
